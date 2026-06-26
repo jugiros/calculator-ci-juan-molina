@@ -126,6 +126,7 @@ pipeline {
                     start /B python -m flask run
                     ping 127.0.0.1 -n 5 > nul
                     if exist jmeter_report rmdir /s /q jmeter_report
+                    if exist jmeter_results.jtl del /f jmeter_results.jtl
                     D:\\JUAN\\PROFESIONAL\\UNIR\\apache-jmeter-5.6.3\\bin\\jmeter.bat -n -t test\\jmeter\\flask.jmx -l jmeter_results.jtl -e -o jmeter_report
                     for /f "tokens=5" %%a in ('netstat -aon ^| findstr :5000') do taskkill /F /PID %%a || exit 0
                 '''
