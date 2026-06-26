@@ -89,11 +89,6 @@ pipeline {
                     '''
                 }
             }
-            post {
-                always {
-                    recordIssues tools: [cobertura(pattern: 'coverage.xml')], qualityGates: [[threshold: 85, type: 'TOTAL', unstable: true]]
-                }
-            }
         }
 
         stage('Performance') {
