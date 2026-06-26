@@ -31,7 +31,7 @@ pipeline {
                     bat '''
                         set FLASK_APP=app\\api.py
                         set FLASK_ENV=development
-                        start /B flask run
+                        start /B python -m flask run
                         start /B java -jar D:\\JUAN\\PROFESIONAL\\UNIR\\wiremock-standalone-3.13.2.jar --port 9090 --root-dir test\\wiremock
                         ping 127.0.0.1 -n 5 > nul
                         set PYTHONPATH=%WORKSPACE%
@@ -69,64 +69,4 @@ pipeline {
             steps {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
                     bat '''
-                        python -m bandit -r app -f xml -o bandit.xml || exit 0
-                    '''
-                }
-            }
-            post {
-                always {
-                    recordIssues tools: [pyLint(pattern: 'bandit.xml')],
-                        qualityGates: [[threshold: 2, type: 'TOTAL', unstable: true],
-                                       [threshold: 4, type: 'TOTAL', unstable: false]]
-                }
-            }
-        }
-
-        stage('Coverage') {
-            steps {
-                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-                    bat '''
-                        set PYTHONPATH=%WORKSPACE%
-                        python -m coverage run --source=app --branch --omit=app\\__init__.py,app\\api.py -m pytest test\\unit
-                        python -m coverage xml
-                    '''
-                }
-            }
-            post {
-                always {
-                    cobertura coberturaReportFile: 'coverage.xml',
-                        lineCoverageTargets: '95, 85, 0',
-                        conditionalCoverageTargets: '90, 80, 0',
-                        onlyStable: false,
-                        failUnhealthy: false,
-                        failUnstable: false
-                }
-            }
-        }
-
-        stage('Performance') {
-            steps {
-                bat '''
-                    set FLASK_APP=app\\api.py
-                    set FLASK_ENV=development
-                    start /B flask run
-                    ping 127.0.0.1 -n 5 > nul
-                    D:\\JUAN\\PROFESIONAL\\UNIR\\apache-jmeter-5.6.3\\bin\\jmeter.bat -n -t test\\jmeter\\flask.jmx -l jmeter_results.jtl -e -o jmeter_report
-                    taskkill /F /IM python.exe /T
-                '''
-            }
-            post {
-                always {
-                    perfReport sourceDataFiles: 'jmeter_results.jtl'
-                }
-            }
-        }
-
-    }
-
-    post {
-        always {
-            cleanWs()
-        }
-    }
-}
+                        python -m bandit -r app -f
